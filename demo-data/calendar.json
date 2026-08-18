@@ -1,0 +1,56 @@
+[
+  {
+    "attendeeEmail": "maya.chen@example.test",
+    "projectLabel": "Project Atlas",
+    "meetingHours": 5,
+    "week": "2026-08-10"
+  },
+  {
+    "attendeeEmail": "maya.chen@example.test",
+    "projectLabel": "Project Beacon",
+    "meetingHours": 3,
+    "week": "2026-08-10"
+  },
+  {
+    "attendeeEmail": "jordan.lee@example.test",
+    "projectLabel": "Project Cedar",
+    "meetingHours": 1,
+    "week": "2026-08-10"
+  },
+  {
+    "attendeeEmail": "priya.shah@example.test",
+    "projectLabel": "Project Atlas",
+    "meetingHours": 1,
+    "week": "2026-08-10"
+  },
+  {
+    "attendeeEmail": "priya.shah@example.test",
+    "projectLabel": "Project Beacon",
+    "meetingHours": 7,
+    "week": "2026-08-10"
+  },
+  {
+    "attendeeEmail": "marcus.reed@example.test",
+    "projectLabel": "Project Beacon",
+    "meetingHours": 5,
+    "week": "2026-08-10"
+  },
+  {
+    "attendeeEmail": "marcus.reed@example.test",
+    "projectLabel": "Project Cedar",
+    "meetingHours": 3,
+    "week": "2026-08-10"
+  },
+  {
+    "attendeeEmail": "elena.garcia@example.test",
+    "projectLabel": "Project Atlas",
+    "meetingHours": 4,
+    "week": "2026-08-10"
+  },
+  {
+    "attendeeEmail": "elena.garcia@example.test",
+    "projectLabel": "Project Beacon",
+    "meetingHours": 4,
+    "week": "2026-08-10"
+  }
+]

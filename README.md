@@ -2,11 +2,14 @@
 
 See [SPEC.md](./SPEC.md) for the full product specification.
 
-> **Status:** this repo currently contains the local project foundation only —
-> pnpm workspace, PostgreSQL via Docker Compose, Drizzle schema/migrations,
-> and deterministic demo seed data. Connectors, the verification engine,
-> sync/employee/manager/executive APIs, and the real UI are implemented in
-> later increments.
+> **Status:** this repo currently contains the local project foundation
+> (pnpm workspace, PostgreSQL via Docker Compose, Drizzle schema/migrations,
+> deterministic demo seed data), the fake external source connectors and
+> normalization layer (`ResourceSignal[]`), and the deterministic
+> verification engine (`VerificationResult[]`). Persistence of results,
+> sync/employee/manager/executive APIs, Confirm/Correct, and the real UI are
+> implemented in later increments. See [ARCHITECTURE.md](./ARCHITECTURE.md)
+> for the full pipeline diagram.
 
 ## Local Foundation — Setup from Scratch
 
@@ -82,14 +85,42 @@ pnpm dev:web
 Starts the Vite dev server on `http://localhost:5173`. Currently shows only
 a placeholder page confirming the local environment is running.
 
-### 8. Type checking and tests
+### 8. Run the connector/normalization demo
+
+```bash
+pnpm connectors:demo
+```
+
+A development-only CLI (no API endpoint) that independently loads the three
+fake source files under `demo-data/` (`allocations.json`, `jira.json`,
+`calendar.json`) through their mock connectors, normalizes each into the
+common `ResourceSignal` representation, resolves fake emails/project codes
+to the stable person/project IDs from PostgreSQL, and prints a readable
+per-person summary — no verification/mismatch decision is made at this
+stage. Requires PostgreSQL to be running and seeded (steps 3–5 above).
+
+### 9. Run the verification engine demo
+
+```bash
+pnpm verification:demo
+```
+
+A development-only CLI (no API endpoint) that runs the same connector +
+normalization pipeline as `pnpm connectors:demo`, then feeds the resulting
+`ResourceSignal[]` into the deterministic verification engine
+(`packages/verification`) and prints each demo person's status, confidence,
+reason, and planned/observed distributions — including Priya Shah's
+`MISMATCH` / `HIGH` result. Requires PostgreSQL to be running and seeded
+(steps 3–5 above).
+
+### 10. Type checking and tests
 
 ```bash
 pnpm typecheck
 pnpm test
 ```
 
-### 9. Resetting demo state
+### 11. Resetting demo state
 
 ```bash
 pnpm demo:reset
@@ -101,10 +132,12 @@ dataset, so the environment can be reset to a known state at any time.
 ## Repository Layout
 
 ```text
-apps/web           React + TypeScript + Vite (placeholder UI for now)
-apps/api           Fastify + TypeScript (GET /health for now)
-packages/database   Drizzle ORM schema, migrations, seed/reset scripts
-packages/connectors Reserved for future Allocation/Jira/Calendar connectors
-packages/shared     Reserved for cross-cutting shared types
-docker-compose.yml  PostgreSQL only
+apps/web              React + TypeScript + Vite (placeholder UI for now)
+apps/api               Fastify + TypeScript (GET /health for now)
+packages/database      Drizzle ORM schema, migrations, seed/reset scripts
+packages/connectors    Mock Allocation/Jira/Calendar connectors + normalization to ResourceSignal[]
+packages/verification  Deterministic verification engine: ResourceSignal[] -> VerificationResult[]
+packages/shared        Cross-cutting types (ResourceSignal)
+demo-data/             Fake source JSON files read by the mock connectors
+docker-compose.yml     PostgreSQL only
 ```

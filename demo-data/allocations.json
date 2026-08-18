@@ -1,0 +1,74 @@
+[
+  {
+    "employeeEmail": "maya.chen@example.test",
+    "projectCode": "ATLAS",
+    "allocationPercent": 50,
+    "validFrom": "2026-08-10",
+    "validTo": null,
+    "week": "2026-08-10"
+  },
+  {
+    "employeeEmail": "maya.chen@example.test",
+    "projectCode": "BEACON",
+    "allocationPercent": 30,
+    "validFrom": "2026-08-10",
+    "validTo": null,
+    "week": "2026-08-10"
+  },
+  {
+    "employeeEmail": "jordan.lee@example.test",
+    "projectCode": "CEDAR",
+    "allocationPercent": 40,
+    "validFrom": "2026-08-10",
+    "validTo": null,
+    "week": "2026-08-10"
+  },
+  {
+    "employeeEmail": "priya.shah@example.test",
+    "projectCode": "ATLAS",
+    "allocationPercent": 60,
+    "validFrom": "2026-08-10",
+    "validTo": null,
+    "week": "2026-08-10"
+  },
+  {
+    "employeeEmail": "priya.shah@example.test",
+    "projectCode": "CEDAR",
+    "allocationPercent": 20,
+    "validFrom": "2026-08-10",
+    "validTo": null,
+    "week": "2026-08-10"
+  },
+  {
+    "employeeEmail": "marcus.reed@example.test",
+    "projectCode": "BEACON",
+    "allocationPercent": 50,
+    "validFrom": "2026-08-10",
+    "validTo": null,
+    "week": "2026-08-10"
+  },
+  {
+    "employeeEmail": "marcus.reed@example.test",
+    "projectCode": "CEDAR",
+    "allocationPercent": 30,
+    "validFrom": "2026-08-10",
+    "validTo": null,
+    "week": "2026-08-10"
+  },
+  {
+    "employeeEmail": "elena.garcia@example.test",
+    "projectCode": "ATLAS",
+    "allocationPercent": 40,
+    "validFrom": "2026-08-10",
+    "validTo": null,
+    "week": "2026-08-10"
+  },
+  {
+    "employeeEmail": "elena.garcia@example.test",
+    "projectCode": "BEACON",
+    "allocationPercent": 40,
+    "validFrom": "2026-08-10",
+    "validTo": null,
+    "week": "2026-08-10"
+  }
+]

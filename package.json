@@ -16,6 +16,8 @@
     "db:seed": "pnpm --filter @resource-verification/database db:seed",
     "db:generate": "pnpm --filter @resource-verification/database db:generate",
     "demo:reset": "pnpm --filter @resource-verification/database demo:reset",
+    "connectors:demo": "pnpm --filter @resource-verification/connectors demo",
+    "verification:demo": "pnpm --filter @resource-verification/verification demo",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down"
   }

@@ -1,0 +1,56 @@
+[
+  {
+    "assigneeEmail": "maya.chen@example.test",
+    "projectKey": "ATLAS",
+    "issuesTouched": 5,
+    "week": "2026-08-10"
+  },
+  {
+    "assigneeEmail": "maya.chen@example.test",
+    "projectKey": "BEACON",
+    "issuesTouched": 3,
+    "week": "2026-08-10"
+  },
+  {
+    "assigneeEmail": "jordan.lee@example.test",
+    "projectKey": "CEDAR",
+    "issuesTouched": 1,
+    "week": "2026-08-10"
+  },
+  {
+    "assigneeEmail": "priya.shah@example.test",
+    "projectKey": "ATLAS",
+    "issuesTouched": 1,
+    "week": "2026-08-10"
+  },
+  {
+    "assigneeEmail": "priya.shah@example.test",
+    "projectKey": "BEACON",
+    "issuesTouched": 9,
+    "week": "2026-08-10"
+  },
+  {
+    "assigneeEmail": "marcus.reed@example.test",
+    "projectKey": "BEACON",
+    "issuesTouched": 5,
+    "week": "2026-08-10"
+  },
+  {
+    "assigneeEmail": "marcus.reed@example.test",
+    "projectKey": "CEDAR",
+    "issuesTouched": 3,
+    "week": "2026-08-10"
+  },
+  {
+    "assigneeEmail": "elena.garcia@example.test",
+    "projectKey": "ATLAS",
+    "issuesTouched": 5,
+    "week": "2026-08-10"
+  },
+  {
+    "assigneeEmail": "elena.garcia@example.test",
+    "projectKey": "BEACON",
+    "issuesTouched": 4,
+    "week": "2026-08-10"
+  }
+]

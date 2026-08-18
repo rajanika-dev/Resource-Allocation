@@ -1,5 +1,5 @@
 {
-  "name": "@resource-verification/connectors",
+  "name": "@resource-verification/verification",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,6 +11,7 @@
     "demo": "tsx src/demo.ts"
   },
   "dependencies": {
+    "@resource-verification/connectors": "workspace:*",
     "@resource-verification/database": "workspace:*",
     "@resource-verification/shared": "workspace:*"
   },
