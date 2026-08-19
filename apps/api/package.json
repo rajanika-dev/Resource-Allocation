@@ -8,12 +8,17 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "workflow:demo": "tsx src/workflowDemo.ts"
   },
   "dependencies": {
     "@fastify/cors": "^10.0.1",
+    "@resource-verification/connectors": "workspace:*",
     "@resource-verification/database": "workspace:*",
+    "@resource-verification/shared": "workspace:*",
+    "@resource-verification/verification": "workspace:*",
     "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.36.4",
     "fastify": "^5.1.0"
   },
   "devDependencies": {

@@ -18,6 +18,7 @@
     "demo:reset": "pnpm --filter @resource-verification/database demo:reset",
     "connectors:demo": "pnpm --filter @resource-verification/connectors demo",
     "verification:demo": "pnpm --filter @resource-verification/verification demo",
+    "workflow:demo": "pnpm --filter @resource-verification/api workflow:demo",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down"
   }

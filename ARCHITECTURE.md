@@ -16,11 +16,13 @@ Verification Engine
         ↓
 VerificationResult[]
         ↓
-PostgreSQL              (not yet used for ResourceSignal[]/results — see status below)
+Persistence
+        ↓
+Human Review
         ↓
 Fastify APIs
         ↓
-React UI
+Frontend (Task 5)
 ```
 
 ## Why a connector + normalization layer exists
@@ -115,25 +117,76 @@ None of this is hard-coded per person — see `packages/verification/src/noHardc
 which scans the engine's own source for any of the five demo people's names
 and fails if one appears.
 
+## Machine analysis vs. human review
+
+This distinction is the core idea of the persistence/workflow layer (Task 4)
+and the two are deliberately never merged into one status:
+
+```text
+Machine analysis (what the system detected — recomputed by every /api/sync run)
+  analysisStatus: CONSISTENT | MISMATCH | LOW_EVIDENCE
+  confidence:     HIGH | MEDIUM | LOW
+
+Human review (what the person later did about it — set only by Confirm/Correct)
+  reviewStatus:   AWAITING_CONFIRMATION | CONFIRMED | CORRECTED
+```
+
+Both live on the same `weekly_verifications` row, in separate columns. When
+Priya's Jira/Calendar activity is concentrated on Project Beacon despite her
+plan emphasizing Project Atlas, the engine correctly finds `analysisStatus =
+MISMATCH`. If she then corrects her allocation, that does **not** change the
+machine's finding — it remains `MISMATCH`; only `reviewStatus` moves from
+`AWAITING_CONFIRMATION` to `CORRECTED`. The engine was right that
+`planned work != observed work` for that week; the correction is Priya's
+resolution of that finding, not a retraction of it.
+
+This also means a re-run of `/api/sync` is safe: it recomputes
+`analysisStatus`/`confidence`/`reason`/`distributionGap` from the current
+signals, but never overwrites an existing `reviewStatus` or the
+`verification_decisions` history — see `packages/api`'s `syncService`
+(`onConflictDoUpdate` intentionally omits `review_status` from its `SET`
+clause).
+
+## Persistence
+
+`POST /api/sync` is the only place `ResourceSignal[]` and
+`VerificationResult[]` get written to PostgreSQL:
+
+* **`activity_signals`** — one row per `ResourceSignal`. Idempotency is a
+  simple replace-then-insert scoped to the requested week (delete existing
+  rows for that `week_start`, then insert the freshly normalized signals) —
+  the simplest strategy that avoids uncontrolled duplicates without needing
+  event sourcing or a queue.
+* **`weekly_verifications`** — one row per `(person_id, week_start)`,
+  upserted on that existing unique constraint. `reviewStatus` defaults to
+  `AWAITING_CONFIRMATION` only on first insert.
+* **`verification_projects`** — one row per project the engine's
+  distributions touched that week (planned/Jira/Calendar/observed
+  percentages), replace-then-insert per verification.
+* **`verification_decisions`** — append-only history of `CONFIRM`/`CORRECT`
+  actions. The Employee Week API surfaces the *latest* one. Critically,
+  **`planned_allocations` is never written to by Confirm/Correct** — it
+  stays the original planning-source record; a correction is a new decision
+  row, not an edit to history (SPEC.md section 3 / Task 4 section 3).
+
 ## What this layer deliberately does NOT do (yet)
 
-* persist `ResourceSignal[]` or `VerificationResult[]` to PostgreSQL,
-* expose any of this over HTTP (`POST /api/sync`, employee/manager/executive
-  APIs),
-* human workflow states (`CONFIRMED` / `CORRECTED`) — those apply to a
-  `VerificationResult` only after a person reviews it, which is a later
-  increment,
-* real Jira/Calendar/Sheets integrations, authentication, or any LLM usage.
+* the final React Employee/Manager/Executive screens or "Viewing As" UI
+  (Task 5),
+* real authentication/RBAC — there is no login; the manager/executive APIs
+  treat all five seeded people as one demo team,
+* real Jira/Calendar/Sheets/Gmail/Confluence integrations, AWS deployment,
+  or any LLM usage.
 
 ## Current status
 
 * **Implemented**: PostgreSQL + Drizzle schema/migrations/seed (Task 1);
   fake source files, mock connectors, and normalization into
   `ResourceSignal[]` (Task 2); the deterministic verification engine
-  (Task 3). Run `pnpm connectors:demo` to see `ResourceSignal[]` for all
-  five demo people, and `pnpm verification:demo` to see the full pipeline
-  through to `VerificationResult[]`.
-* **Not yet implemented**: persisting `ResourceSignal[]`/`VerificationResult[]`,
-  `POST /api/sync`, the employee/manager/executive APIs, Confirm/Correct,
-  and the real UI. `apps/api` currently exposes only `GET /health`, and
-  `apps/web` shows only a placeholder page.
+  (Task 3); persistence, human review, and the Fastify API layer (Task 4).
+  Run `pnpm connectors:demo` / `pnpm verification:demo` for the in-memory
+  pipeline, and `pnpm workflow:demo` for the full persistent backend story
+  (sync → correct → manager → executive) end to end.
+* **Not yet implemented**: the real React UI (Employee/Manager/Executive
+  screens, "Viewing As"), authentication. `apps/web` currently shows only a
+  placeholder page.

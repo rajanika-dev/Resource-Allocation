@@ -13,12 +13,24 @@ importers:
       '@fastify/cors':
         specifier: ^10.0.1
         version: 10.1.0
+      '@resource-verification/connectors':
+        specifier: workspace:*
+        version: link:../../packages/connectors
       '@resource-verification/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@resource-verification/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      '@resource-verification/verification':
+        specifier: workspace:*
+        version: link:../../packages/verification
       dotenv:
         specifier: ^16.4.5
         version: 16.6.1
+      drizzle-orm:
+        specifier: ^0.36.4
+        version: 0.36.4(@types/react@18.3.31)(postgres@3.4.9)(react@18.3.1)
       fastify:
         specifier: ^5.1.0
         version: 5.12.0

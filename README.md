@@ -2,14 +2,15 @@
 
 See [SPEC.md](./SPEC.md) for the full product specification.
 
-> **Status:** this repo currently contains the local project foundation
-> (pnpm workspace, PostgreSQL via Docker Compose, Drizzle schema/migrations,
+> **Status:** this repo contains the local project foundation (pnpm
+> workspace, PostgreSQL via Docker Compose, Drizzle schema/migrations,
 > deterministic demo seed data), the fake external source connectors and
-> normalization layer (`ResourceSignal[]`), and the deterministic
-> verification engine (`VerificationResult[]`). Persistence of results,
-> sync/employee/manager/executive APIs, Confirm/Correct, and the real UI are
-> implemented in later increments. See [ARCHITECTURE.md](./ARCHITECTURE.md)
-> for the full pipeline diagram.
+> normalization layer (`ResourceSignal[]`), the deterministic verification
+> engine (`VerificationResult[]`), and the persistent backend workflow —
+> sync, human review (Confirm/Correct), and the employee/manager/executive
+> Fastify APIs. The real React UI (Employee/Manager/Executive screens,
+> "Viewing As") is implemented in a later increment. See
+> [ARCHITECTURE.md](./ARCHITECTURE.md) for the full pipeline diagram.
 
 ## Local Foundation — Setup from Scratch
 
@@ -67,14 +68,25 @@ the future mismatch-detection logic will use).
 pnpm dev:api
 ```
 
-Starts the Fastify API on `http://localhost:3001`. Currently exposes only:
+Starts the Fastify API on `http://localhost:3001`. Exposes:
 
 ```http
-GET /health
+GET  /health
+POST /api/sync
+GET  /api/employees/:personId/week
+POST /api/employees/:personId/week/confirm
+POST /api/employees/:personId/week/correct
+GET  /api/manager/exceptions
+GET  /api/manager/people/:personId/week
+GET  /api/executive/summary
 ```
 
-which returns `{ "status": "ok", "database": "connected" }` after verifying
-it can reach PostgreSQL.
+`/health` returns `{ "status": "ok", "database": "connected" }` after
+verifying it can reach PostgreSQL. All other routes accept an optional
+`weekStart` (query for `GET`, body for `POST`) and default to the project's
+demo week when omitted. Run `POST /api/sync` at least once before the other
+routes will find any data — see `pnpm workflow:demo` below for the full
+sequence.
 
 ### 7. Run the frontend
 
@@ -113,14 +125,34 @@ reason, and planned/observed distributions — including Priya Shah's
 `MISMATCH` / `HIGH` result. Requires PostgreSQL to be running and seeded
 (steps 3–5 above).
 
-### 10. Type checking and tests
+### 10. Run the full backend workflow demo
+
+```bash
+pnpm workflow:demo
+```
+
+The most convincing fallback demo — exercises the complete persistent
+backend story through the real Fastify routes (via `.inject()`, no server
+process or frontend needed): resets the database, runs `/api/sync`, shows
+Priya's machine analysis (`MISMATCH` / `HIGH` / `AWAITING_CONFIRMATION`),
+submits her correction (Atlas 30 / Beacon 50 / Cedar 20), re-fetches her week
+to prove the machine analysis stayed `MISMATCH` while `reviewStatus` became
+`CORRECTED`, then prints the manager exceptions list and an executive
+summary before/after comparison showing `correctedCount`, `verifiedCount`,
+and `awaitingConfirmationCount` all changing accordingly. Requires
+PostgreSQL to be running (step 3 above) — it reseeds the database itself.
+
+### 11. Type checking and tests
 
 ```bash
 pnpm typecheck
 pnpm test
 ```
 
-### 11. Resetting demo state
+The `apps/api` suite runs Fastify-injected integration tests against the
+real database, so PostgreSQL must be running and migrated (steps 3–4 above).
+
+### 12. Resetting demo state
 
 ```bash
 pnpm demo:reset
@@ -132,12 +164,12 @@ dataset, so the environment can be reset to a known state at any time.
 ## Repository Layout
 
 ```text
-apps/web              React + TypeScript + Vite (placeholder UI for now)
-apps/api               Fastify + TypeScript (GET /health for now)
-packages/database      Drizzle ORM schema, migrations, seed/reset scripts
-packages/connectors    Mock Allocation/Jira/Calendar connectors + normalization to ResourceSignal[]
-packages/verification  Deterministic verification engine: ResourceSignal[] -> VerificationResult[]
-packages/shared        Cross-cutting types (ResourceSignal)
-demo-data/             Fake source JSON files read by the mock connectors
-docker-compose.yml     PostgreSQL only
+apps/web               React + TypeScript + Vite (placeholder UI for now)
+apps/api                Fastify + TypeScript: sync, employee/manager/executive APIs
+packages/database       Drizzle ORM schema, migrations, seed/reset scripts
+packages/connectors     Mock Allocation/Jira/Calendar connectors + normalization to ResourceSignal[]
+packages/verification   Deterministic verification engine: ResourceSignal[] -> VerificationResult[]
+packages/shared         Cross-cutting types (ResourceSignal)
+demo-data/              Fake source JSON files read by the mock connectors
+docker-compose.yml      PostgreSQL only
 ```
