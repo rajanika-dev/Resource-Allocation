@@ -1,5 +1,5 @@
 /**
- * Deterministic fake demo data for the Resource Verification MVP.
+ * Deterministic fake demo data for the Resource Allocation MVP.
  * IDs are fixed constants (not randomly generated) so that seeding is
  * idempotent and `demo:reset` always restores the exact same state.
  * All names/emails are fictional, per SPEC.md section 6.

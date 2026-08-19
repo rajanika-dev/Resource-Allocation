@@ -5,6 +5,7 @@ import App from "./App";
 import {
   executiveSummary,
   executiveSummaryAfterCorrection,
+  jordanLowEvidenceWeek,
   managerExceptions,
   managerExceptionsAfterCorrection,
   priyaConfirmedWeek,
@@ -243,6 +244,39 @@ describe("manager exception view", () => {
     expect(screen.getByText("Employee review")).toBeTruthy();
   });
 
+  it("keeps only true anomalies in Needs attention, not merely-unconfirmed people", async () => {
+    render(<App />);
+    await switchPersona("Manager");
+    await screen.findByRole("heading", { name: "Team Verification" });
+
+    const attention = screen.getByRole("heading", { name: "Needs attention" }).closest("section") as HTMLElement;
+    expect(within(attention).getByText("Priya Shah")).toBeTruthy();
+    expect(within(attention).getByText("Jordan Lee")).toBeTruthy();
+    // Consistent people who simply have not replied are not exceptions.
+    expect(within(attention).queryByText("Maya Chen")).toBeNull();
+
+    const awaiting = screen
+      .getByRole("heading", { name: "Awaiting confirmation" })
+      .closest("section") as HTMLElement;
+    expect(within(awaiting).getByText("Maya Chen")).toBeTruthy();
+    expect(within(awaiting).getByText("Elena Garcia")).toBeTruthy();
+    expect(within(awaiting).getByText("Marcus Reed")).toBeTruthy();
+  });
+
+  it("does not assert a project-level verdict for a low-evidence week", async () => {
+    mocked.getManagerPersonWeek.mockResolvedValue(jordanLowEvidenceWeek);
+
+    render(<App />);
+    await switchPersona("Manager");
+    await screen.findByRole("heading", { name: "Team Verification" });
+    await userEvent.click(screen.getByText("Jordan Lee"));
+
+    await screen.findByRole("heading", { name: "Jordan Lee" });
+    expect(screen.getByText("Insufficient evidence")).toBeTruthy();
+    // 100% planned vs 100% observed is an artifact of two signals, not agreement.
+    expect(screen.queryByText("On plan")).toBeNull();
+  });
+
   it("reflects a persisted correction", async () => {
     mocked.getManagerExceptions.mockResolvedValue(managerExceptionsAfterCorrection);
 
@@ -260,7 +294,8 @@ describe("executive summary view", () => {
     render(<App />);
     await screen.findByRole("heading", { name: "Resource Health" });
 
-    expect(screen.getByText("2 allocation issues need review")).toBeTruthy();
+    // Wording must cover low-evidence cases too, which are not "issues".
+    expect(screen.getByText("2 resource checks need attention")).toBeTruthy();
     expect(screen.getByText("1 allocation mismatch requires review")).toBeTruthy();
     expect(screen.getByText("1 person has insufficient activity evidence")).toBeTruthy();
     expect(screen.getByText("Employee-adjusted allocations")).toBeTruthy();

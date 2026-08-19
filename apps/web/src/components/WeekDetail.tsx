@@ -49,6 +49,7 @@ export function WeekDetail({
   footer?: ReactNode;
 }) {
   const { verification, humanReview } = week;
+  const isLowEvidence = verification.analysisStatus === "LOW_EVIDENCE";
 
   return (
     <div className="stack">
@@ -84,8 +85,19 @@ export function WeekDetail({
         </div>
       </Card>
 
-      <Card title="Planned vs observed" subtitle="Share of the week per project">
-        <DistributionCompare planned={week.plannedDistribution} observed={week.observedDistribution} />
+      <Card
+        title="Planned vs observed"
+        subtitle={
+          isLowEvidence
+            ? "Share of the week per project — too little activity to draw a conclusion"
+            : "Share of the week per project"
+        }
+      >
+        <DistributionCompare
+          planned={week.plannedDistribution}
+          observed={week.observedDistribution}
+          lowEvidence={isLowEvidence}
+        />
       </Card>
 
       <Card title="Source evidence" subtitle="What each independent source reported" bodyless>

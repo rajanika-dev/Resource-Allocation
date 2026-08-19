@@ -4,17 +4,21 @@ import { AnalysisBadge, Avatar, ConfidenceBadge, ReviewBadge } from "../componen
 import { Card, EmptyState, ErrorState, Kpi, LoadingState, PageHeader, formatWeek } from "../components/primitives";
 import { useAsync } from "../hooks/useAsync";
 
-/** Exception-first ordering: unresolved problems first, settled people last. */
-function attentionRank(person: ManagerPerson): number {
-  if (person.analysisStatus === "MISMATCH" && person.reviewStatus === "AWAITING_CONFIRMATION") return 0;
-  if (person.analysisStatus === "LOW_EVIDENCE" && person.reviewStatus === "AWAITING_CONFIRMATION") return 1;
-  if (person.analysisStatus === "MISMATCH") return 2;
-  if (person.reviewStatus === "AWAITING_CONFIRMATION") return 3;
-  return 4;
+/**
+ * A true anomaly is something the engine actually flagged. Someone who is
+ * CONSISTENT but has not replied yet is an outstanding task, not an
+ * exception — mixing the two would put the whole team in the queue and
+ * defeat the exception-first design.
+ */
+function isAnomaly(person: ManagerPerson): boolean {
+  return person.analysisStatus === "MISMATCH" || person.analysisStatus === "LOW_EVIDENCE";
 }
 
-function needsAttention(person: ManagerPerson): boolean {
-  return attentionRank(person) <= 3;
+/** Within the anomaly queue: unanswered first, then mismatches before low evidence. */
+function anomalyRank(person: ManagerPerson): number {
+  const unanswered = person.reviewStatus === "AWAITING_CONFIRMATION" ? 0 : 1;
+  const severity = person.analysisStatus === "MISMATCH" ? 0 : 1;
+  return unanswered * 2 + severity;
 }
 
 function PersonRow({ person, onOpen }: { person: ManagerPerson; onOpen: () => void }) {
@@ -70,9 +74,15 @@ export function ManagerTeamPage({
     );
   }
 
-  const sorted = [...people].sort((a, b) => attentionRank(a) - attentionRank(b) || a.name.localeCompare(b.name));
-  const attention = sorted.filter(needsAttention);
-  const settled = sorted.filter((person) => !needsAttention(person));
+  const byName = (a: ManagerPerson, b: ManagerPerson) => a.name.localeCompare(b.name);
+
+  const attention = people.filter(isAnomaly).sort((a, b) => anomalyRank(a) - anomalyRank(b) || byName(a, b));
+  const awaiting = people
+    .filter((person) => !isAnomaly(person) && person.reviewStatus === "AWAITING_CONFIRMATION")
+    .sort(byName);
+  const settled = people
+    .filter((person) => !isAnomaly(person) && person.reviewStatus !== "AWAITING_CONFIRMATION")
+    .sort(byName);
 
   return (
     <>
@@ -114,12 +124,12 @@ export function ManagerTeamPage({
       <div className="stack">
         <Card
           title="Needs attention"
-          subtitle="Unresolved findings and outstanding responses, most urgent first"
+          subtitle="Mismatches and low-evidence weeks, unanswered first"
           meta={`${attention.length} of ${summary.peopleTracked}`}
           bodyless
         >
           {attention.length === 0 ? (
-            <div className="state">Everyone has responded and no findings are outstanding.</div>
+            <div className="state">No mismatches or low-evidence weeks on the team.</div>
           ) : (
             <div className="row-list">
               {attention.map((person) => (
@@ -132,6 +142,25 @@ export function ManagerTeamPage({
             </div>
           )}
         </Card>
+
+        {awaiting.length > 0 && (
+          <Card
+            title="Awaiting confirmation"
+            subtitle="No findings — these people just have not confirmed their week yet"
+            meta={`${awaiting.length}`}
+            bodyless
+          >
+            <div className="row-list">
+              {awaiting.map((person) => (
+                <PersonRow
+                  key={person.personId}
+                  person={person}
+                  onOpen={() => onOpenPerson(person.personId)}
+                />
+              ))}
+            </div>
+          </Card>
+        )}
 
         {settled.length > 0 && (
           <Card title="Resolved" subtitle="Verified and responded" meta={`${settled.length}`} bodyless>

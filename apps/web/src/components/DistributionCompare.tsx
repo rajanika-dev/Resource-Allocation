@@ -59,9 +59,17 @@ function rowFlag(row: ComparisonRow) {
 export function DistributionCompare({
   planned,
   observed,
+  lowEvidence = false,
 }: {
   planned: DistributionEntry[];
   observed: DistributionEntry[];
+  /**
+   * When the engine found too little activity to judge, the observed shares
+   * are a normalisation artifact of a handful of signals. Showing "On plan"
+   * off the back of that would assert a verdict the engine explicitly did
+   * not reach, so per-project judgment is suppressed.
+   */
+  lowEvidence?: boolean;
 }) {
   const rows = buildComparison(planned, observed);
 
@@ -75,7 +83,11 @@ export function DistributionCompare({
         <div className="dist-row" key={row.projectId}>
           <div className="dist-head">
             <span className="dist-name">{row.projectName}</span>
-            {rowFlag(row)}
+            {lowEvidence ? (
+              <span className="badge badge-neutral">Insufficient evidence</span>
+            ) : (
+              rowFlag(row)
+            )}
           </div>
 
           <div className="dist-bars">

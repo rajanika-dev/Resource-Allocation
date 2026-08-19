@@ -75,6 +75,31 @@ export const priyaConfirmedWeek: EmployeeWeek = {
   },
 };
 
+/**
+ * Low evidence: one Jira issue and one meeting hour normalise to a tidy
+ * 100%/100% on Cedar, which must NOT be presented as an "On plan" verdict.
+ */
+export const jordanLowEvidenceWeek: EmployeeWeek = {
+  person: { id: JORDAN_ID, name: "Jordan Lee", role: "Software Engineer", department: "Engineering" },
+  verification: {
+    weekStart: "2026-08-10",
+    analysisStatus: "LOW_EVIDENCE",
+    confidence: "LOW",
+    reviewStatus: "AWAITING_CONFIRMATION",
+    reason:
+      "Not enough Jira or Calendar activity was found to confidently compare observed work with the declared allocation.",
+    distributionGap: 0,
+  },
+  plannedDistribution: [{ projectId: CEDAR, projectName: "Project Cedar", percentage: 100 }],
+  observedDistribution: [{ projectId: CEDAR, projectName: "Project Cedar", percentage: 100 }],
+  evidence: {
+    allocation: [{ projectId: CEDAR, projectName: "Project Cedar", quantity: 40, evidence: {} }],
+    jira: [{ projectId: CEDAR, projectName: "Project Cedar", quantity: 1, evidence: {} }],
+    calendar: [{ projectId: CEDAR, projectName: "Project Cedar", quantity: 1, evidence: {} }],
+  },
+  humanReview: null,
+};
+
 export const managerExceptions: ManagerExceptions = {
   weekStart: "2026-08-10",
   summary: {

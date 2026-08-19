@@ -1,4 +1,4 @@
-# Resource Verification MVP
+# Resource Allocation MVP
 
 See [SPEC.md](./SPEC.md) for the full product specification.
 

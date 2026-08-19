@@ -23,7 +23,7 @@ export function Sidebar({
     <aside className="sidebar">
       <div className="sidebar-brand">
         <div className="brand-eyebrow">Ankobia ICP</div>
-        <div className="brand-name">Resource Verification</div>
+        <div className="brand-name">Resource Allocation</div>
         <div className="brand-sub">
           Weekly allocation assurance
           {weekLabel && (

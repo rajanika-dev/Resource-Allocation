@@ -92,7 +92,9 @@ export function ExecutiveHealthPage({
           {aligned
             ? "Resources are aligned"
             : openFindings > 0
-              ? `${openFindings} allocation ${openFindings === 1 ? "issue" : "issues"} need review`
+              ? // Covers both mismatches and low-evidence cases, which are not
+                // all "allocation issues" — a low-evidence week may be fine.
+                `${openFindings} resource ${openFindings === 1 ? "check needs" : "checks need"} attention`
               : "Awaiting employee confirmations"}
         </div>
         {summary.verifiedCount} of {summary.peopleTracked} people verified ({verifiedPercent}%) across{" "}
