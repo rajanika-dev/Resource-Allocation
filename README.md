@@ -2,15 +2,28 @@
 
 See [SPEC.md](./SPEC.md) for the full product specification.
 
-> **Status:** this repo contains the local project foundation (pnpm
-> workspace, PostgreSQL via Docker Compose, Drizzle schema/migrations,
-> deterministic demo seed data), the fake external source connectors and
-> normalization layer (`ResourceSignal[]`), the deterministic verification
-> engine (`VerificationResult[]`), and the persistent backend workflow —
-> sync, human review (Confirm/Correct), and the employee/manager/executive
-> Fastify APIs. The real React UI (Employee/Manager/Executive screens,
-> "Viewing As") is implemented in a later increment. See
+> **Status:** the MVP is feature-complete end to end — PostgreSQL + Drizzle
+> schema/seed, fake source connectors, normalization into `ResourceSignal[]`,
+> the deterministic verification engine, the persistent backend workflow
+> (sync, Confirm/Correct, employee/manager/executive APIs), and the React
+> frontend with three genuinely different persona experiences. See
 > [ARCHITECTURE.md](./ARCHITECTURE.md) for the full pipeline diagram.
+
+## Quick start for a demo
+
+```bash
+pnpm install
+cp .env.example .env
+pnpm docker:up
+pnpm db:migrate
+pnpm demo:reset     # clean, pre-sync demo state
+pnpm dev:api        # terminal 1 — http://localhost:3001
+pnpm dev:web        # terminal 2 — http://localhost:5173
+```
+
+Then open `http://localhost:5173` and press **Run sync** — the UI starts from
+an explicit empty state so the demo can begin from zero. See
+[DEMO.md](./DEMO.md) for the full walkthrough.
 
 ## Local Foundation — Setup from Scratch
 
@@ -94,8 +107,23 @@ sequence.
 pnpm dev:web
 ```
 
-Starts the Vite dev server on `http://localhost:5173`. Currently shows only
-a placeholder page confirming the local environment is running.
+Starts the Vite dev server on `http://localhost:5173`. The API must also be
+running (step 6) — the frontend reads `VITE_API_BASE_URL` from the workspace
+root `.env` and falls back to `http://localhost:3001`.
+
+The UI has three persona experiences, chosen with the **Viewing as** switcher
+in the sidebar. Each is a real route, so a browser refresh stays put:
+
+| Persona | Route | Experience |
+| --- | --- | --- |
+| Employee (Priya Shah) | `#/employee` | *My Week* — planned vs observed, source evidence, Confirm / Correct |
+| Manager | `#/manager` | *Team Verification* — exception-first team list, read-only drill-down |
+| Executive | `#/executive` | *Resource Health* — compact KPIs, Needs Attention, drill-down |
+
+If no sync has run for the week, each landing page shows an explicit empty
+state with a **Run sync** button (also always available in the sidebar), so a
+demo can start from zero without touching a terminal. To reset to the
+original fake data, run `pnpm demo:reset`.
 
 ### 8. Run the connector/normalization demo
 
@@ -164,7 +192,7 @@ dataset, so the environment can be reset to a known state at any time.
 ## Repository Layout
 
 ```text
-apps/web               React + TypeScript + Vite (placeholder UI for now)
+apps/web               React + TypeScript + Vite: Employee/Manager/Executive personas
 apps/api                Fastify + TypeScript: sync, employee/manager/executive APIs
 packages/database       Drizzle ORM schema, migrations, seed/reset scripts
 packages/connectors     Mock Allocation/Jira/Calendar connectors + normalization to ResourceSignal[]

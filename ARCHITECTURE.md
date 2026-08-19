@@ -22,7 +22,7 @@ Human Review
         ↓
 Fastify APIs
         ↓
-Frontend (Task 5)
+React Frontend (Employee / Manager / Executive)
 ```
 
 ## Why a connector + normalization layer exists
@@ -169,24 +169,53 @@ clause).
   stays the original planning-source record; a correction is a new decision
   row, not an edit to history (SPEC.md section 3 / Task 4 section 3).
 
-## What this layer deliberately does NOT do (yet)
+## Frontend
 
-* the final React Employee/Manager/Executive screens or "Viewing As" UI
-  (Task 5),
-* real authentication/RBAC — there is no login; the manager/executive APIs
-  treat all five seeded people as one demo team,
+`apps/web` is a small React + Vite app that reads only the Fastify APIs — it
+holds no verification logic of its own. Three persona experiences share one
+shell:
+
+* **Employee** (`#/employee`, bound to Priya Shah) — *My Week*: the machine
+  finding, planned vs observed per project, per-source evidence, and the only
+  place Confirm/Correct exist.
+* **Manager** (`#/manager`) — *Team Verification*: an exception-first list
+  ordered by unresolved risk, plus a read-only drill-down per person.
+* **Executive** (`#/executive`) — *Resource Health*: compact KPIs, a short
+  Needs Attention list, and a drill-down into the people behind open findings.
+
+Two decisions matter for the demo. First, the **Viewing as** switcher changes
+the route, not just a label: navigation, landing page, information density and
+available actions all differ, and responding to a finding is an Employee-only
+action. Second, routing is hash-based, so a browser refresh returns to the
+same screen — which is how the demo proves a correction came back from
+PostgreSQL rather than from React state.
+
+The UI mirrors the machine/human split described above: `WeekDetail` renders
+"Machine analysis" and "Your review" as two separate panes, so a correction
+visibly moves the review state to `CORRECTED` while the analysis stays
+`MISMATCH`.
+
+## What this layer deliberately does NOT do
+
+* real authentication/RBAC — the persona switcher is an explicit demo
+  simulation; the manager/executive APIs treat all five seeded people as one
+  demo team,
 * real Jira/Calendar/Sheets/Gmail/Confluence integrations, AWS deployment,
   or any LLM usage.
 
 ## Current status
 
-* **Implemented**: PostgreSQL + Drizzle schema/migrations/seed (Task 1);
-  fake source files, mock connectors, and normalization into
-  `ResourceSignal[]` (Task 2); the deterministic verification engine
-  (Task 3); persistence, human review, and the Fastify API layer (Task 4).
-  Run `pnpm connectors:demo` / `pnpm verification:demo` for the in-memory
-  pipeline, and `pnpm workflow:demo` for the full persistent backend story
-  (sync → correct → manager → executive) end to end.
-* **Not yet implemented**: the real React UI (Employee/Manager/Executive
-  screens, "Viewing As"), authentication. `apps/web` currently shows only a
-  placeholder page.
+The whole vertical slice is implemented: PostgreSQL + Drizzle
+schema/migrations/seed; fake source files, mock connectors and normalization
+into `ResourceSignal[]`; the deterministic verification engine; persistence,
+human review and the Fastify API layer; and the React frontend.
+
+Useful entry points:
+
+* `pnpm connectors:demo` / `pnpm verification:demo` — the in-memory pipeline.
+* `pnpm workflow:demo` — the full persistent backend story (sync → correct →
+  manager → executive) with no frontend involved, as a demo fallback.
+* `pnpm dev:api` + `pnpm dev:web` — the live UI demo.
+
+Not implemented, by design: authentication/RBAC and any real external
+integration.
